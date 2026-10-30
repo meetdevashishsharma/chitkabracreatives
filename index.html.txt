@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chitkabra Creatives | Premium Motion Design Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --midnight-navy: #0B1120;
+            --warm-platinum: #F6F6F4;
+            --terracotta: #C96A4E;
+            --slate-gray: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--warm-platinum);
+            color: var(--midnight-navy);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo img {
+            height: 60px; /* Adjust based on image_11.png dimensions */
+            object-fit: contain;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--midnight-navy);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--terracotta);
+        }
+
+        .btn-whatsapp {
+            background-color: var(--midnight-navy);
+            color: var(--warm-platinum) !important;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: var(--terracotta);
+        }
+
+        /* Hero Section */
+        header {
+            padding: 10vh 5% 5vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            line-height: 1.1;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--slate-gray);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            font-weight: 300;
+        }
+
+        /* Showreel Section */
+        .showreel-container {
+            max-width: 1200px;
+            margin: 0 auto 5rem;
+            padding: 0 5%;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            background-color: var(--midnight-navy);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Services / Capabilities */
+        .capabilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            padding: 5rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            border-top: 1px solid rgba(11, 17, 32, 0.1);
+        }
+
+        .capability-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .capability-card p {
+            color: var(--slate-gray);
+            font-size: 0.95rem;
+        }
+
+        /* Footer / CTA */
+        footer {
+            background-color: var(--midnight-navy);
+            color: var(--warm-platinum);
+            text-align: center;
+            padding: 6rem 5%;
+            margin-top: 4rem;
+        }
+
+        footer h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        footer p {
+            color: #94A3B8;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--warm-platinum);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--terracotta);
+            padding-bottom: 5px;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 0.8;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; /* Hide standard links on mobile for simplicity, keep CTA in footer */
+            }
+            header {
+                padding: 5vh 5% 5vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <!-- Referencing your provided logo file -->
+            <img src="7ebce4c7-ff15-4f69-8a79-34d6caa1cf61.jpg" alt="Chitkabra Creatives Logo">
+        </div>
+        <div class="nav-links">
+            <a href="mailto:devashish@chitkabracreatives.com">Email Studio</a>
+            <a href="https://wa.me/919001178854" target="_blank" class="btn-whatsapp">WhatsApp Us</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header>
+        <h1>We Build Dynamic Motion Campaigns.</h1>
+        <p class="hero-subtitle">Specializing in high-end 2D/3D animation, generative AI, and large-format experiential event displays for premium brands.</p>
+    </header>
+
+    <!-- Showreel Section -->
+    <section class="showreel-container">
+        <div class="video-wrapper">
+            <!-- Referencing your provided showreel -->
+            <video controls poster="7ebce4c7-ff15-4f69-8a79-34d6caa1cf61.jpg">
+                <source src="showreel.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </section>
+
+    <!-- Capabilities Section (Based on your LinkedIn strategy) -->
+    <section class="capabilities">
+        <div class="capability-card">
+            <h3>Large-Format Experiential</h3>
+            <p>Managing extreme ultra-wide canvases (up to 13920x1200) for massive stage backdrops and digital out-of-home displays.</p>
+        </div>
+        <div class="capability-card">
+            <h3>2D/3D Brand Animation</h3>
+            <p>End-to-end studio production utilizing After Effects and Blender to craft kinetic typography, product reveals, and visual storytelling.</p>
+        </div>
+        <div class="capability-card">
+            <h3>Strategic Explainers</h3>
+            <p>Breaking down complex timelines, civic information, and corporate products into easily digestible, highly engaging visual narratives.</p>
+        </div>
+    </section>
+
+    <!-- Footer / Contact CTA -->
+    <footer>
+        <h2>Let's build something that moves.</h2>
+        <p>Currently accepting new projects and white-label agency partnerships.</p>
+        <div class="footer-links">
+            <a href="mailto:devashish@chitkabracreatives.com">devashish@chitkabracreatives.com</a>
+            <a href="https://wa.me/919001178854" target="_blank">WhatsApp: +91 90011 78854</a>
+        </div>
+    </footer>
+
+</body>
+</html>
