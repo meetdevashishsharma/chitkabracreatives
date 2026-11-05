@@ -3,7 +3,7 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="referrer" content="origin">
+  <meta name="referrer" content="origin-when-cross-origin">
   <title>Chitkabra Creatives — Videos That Drive Brands Forward</title>
   <!-- SVG Vector Favicon per Section 6 of Brand Guidelines -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='24' fill='%23FAFAF9'/%3E%3Cg transform='translate(18,10)'%3E%3Crect x='0' y='20' width='20' height='60' fill='%23E85D04'/%3E%3Cpolygon points='0,20 20,0 20,20' fill='%23C2410C'/%3E%3Cpolygon points='0,80 20,80 20,100' fill='%23C2410C'/%3E%3Cpolygon points='20,0 84,0 84,30.5 64.5,30.5 64.5,20 20,20' fill='%230B1B3D'/%3E%3Cpolygon points='20,80 64.5,80 64.5,69.5 84,69.5 84,100 20,100' fill='%230B1B3D'/%3E%3Cpolygon points='35.8,31 67.8,50 35.8,69' fill='%23E85D04'/%3E%3C/g%3E%3C/svg%3E">
@@ -481,8 +481,7 @@
       }
     }
   </style>
-</head>
-<body class="antialiased selection:bg-[#E85D04] selection:text-white relative">
+</head><body class="antialiased selection:bg-[#E85D04] selection:text-white relative">
 
 
 
@@ -1174,12 +1173,8 @@
                 Let's get the conversation rolling.
               </p>
 
-              <form id="startProjectForm" action="https://formsubmit.co/contact@chitkabracreatives.com" method="POST" class="space-y-5" novalidate="">
+              <form id="startProjectForm" class="space-y-5" novalidate="">
                 <input type="hidden" name="form_type" value="Start a Project">
-                <input type="hidden" name="_subject" value="[Start a Project] New Website Inquiry — Chitkabra Creatives">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_template" value="table">
-                <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label for="contactName" class="block text-xs font-bold uppercase tracking-wider text-[#0B1B3D] mb-2">Name *</label>
@@ -1352,12 +1347,8 @@
           </button>
         </div>
 
-        <form id="ndaRequestAccessForm" action="https://formsubmit.co/contact@chitkabracreatives.com" method="POST" class="space-y-4" novalidate="">
+        <form id="ndaRequestAccessForm" class="space-y-4" novalidate="">
           <input type="hidden" name="form_type" value="Request Password">
-          <input type="hidden" name="_subject" value="[Request Password] Showreel NDA Access — Chitkabra Creatives">
-          <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_template" value="table">
-          <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
           <div>
             <label for="ndaReqName" class="block text-xs font-bold uppercase tracking-wider text-[#0B1B3D] mb-1.5">Name *</label>
             <input id="ndaReqName" name="name" type="text" required="" placeholder="Full Name" class="w-full px-4 py-3 rounded-xl bg-[#FAFAF9] border border-[#334155]/20 text-sm text-[#0B1B3D] focus:border-[#E85D04] focus:bg-white focus:outline-none">
@@ -1568,103 +1559,6 @@
         if (validEl) validEl.classList.remove('hidden');
         return true;
       }
-    }
-
-    // =========================================================================
-    // RELIABLE MULTI-STRATEGY EMAIL DELIVERY TO contact@chitkabracreatives.com
-    // =========================================================================
-    const STUDIO_CONTACT_EMAIL = "contact@chitkabracreatives.com";
-    const FORMSUBMIT_AJAX_URL = `https://formsubmit.co/ajax/${STUDIO_CONTACT_EMAIL}`;
-    const FORMSUBMIT_DIRECT_URL = `https://formsubmit.co/${STUDIO_CONTACT_EMAIL}`;
-
-    async function sendStudioEmail(payload) {
-      const enrichedPayload = Object.assign({
-        _captcha: "false",
-        _template: "table",
-        _replyto: payload.email || ""
-      }, payload);
-
-      // Strategy 1: FormSubmit AJAX endpoint with FormData & explicit origin referrer
-      try {
-        const formData = new FormData();
-        Object.entries(enrichedPayload).forEach(([key, val]) => {
-          if (val !== undefined && val !== null) {
-            formData.append(key, String(val));
-          }
-        });
-
-        const response = await fetch(FORMSUBMIT_AJAX_URL, {
-          method: "POST",
-          headers: {
-            "Accept": "application/json"
-          },
-          referrerPolicy: "origin",
-          body: formData
-        });
-
-        const result = await response.json().catch(() => ({}));
-        if (response.ok && (result.success === true || result.success === "true")) {
-          return { ok: true, method: "ajax-formdata", result };
-        }
-      } catch (err) {}
-
-      // Strategy 2: FormSubmit AJAX endpoint with JSON body
-      try {
-        const response = await fetch(FORMSUBMIT_AJAX_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          referrerPolicy: "origin",
-          body: JSON.stringify(enrichedPayload)
-        });
-
-        const result = await response.json().catch(() => ({}));
-        if (response.ok && (result.success === true || result.success === "true")) {
-          return { ok: true, method: "ajax-json", result };
-        }
-      } catch (err) {}
-
-      // Strategy 3: Hidden iframe POST fallback to https://formsubmit.co/contact@chitkabracreatives.com
-      // (Ensures delivery and initial FormSubmit inbox activation even when CORS/Referer headers are restricted)
-      return new Promise((resolve) => {
-        try {
-          let iframe = document.getElementById("hiddenStudioMailFrame");
-          if (!iframe) {
-            iframe = document.createElement("iframe");
-            iframe.id = "hiddenStudioMailFrame";
-            iframe.name = "hiddenStudioMailFrame";
-            iframe.style.display = "none";
-            document.body.appendChild(iframe);
-          }
-
-          const tempForm = document.createElement("form");
-          tempForm.method = "POST";
-          tempForm.action = FORMSUBMIT_DIRECT_URL;
-          tempForm.target = "hiddenStudioMailFrame";
-          tempForm.style.display = "none";
-
-          Object.entries(enrichedPayload).forEach(([key, val]) => {
-            if (val !== undefined && val !== null) {
-              const input = document.createElement("input");
-              input.type = "hidden";
-              input.name = key;
-              input.value = String(val);
-              tempForm.appendChild(input);
-            }
-          });
-
-          document.body.appendChild(tempForm);
-          tempForm.submit();
-          setTimeout(() => {
-            if (tempForm.parentNode) tempForm.parentNode.removeChild(tempForm);
-            resolve({ ok: true, method: "iframe-post" });
-          }, 900);
-        } catch (fallbackErr) {
-          resolve({ ok: false, error: fallbackErr });
-        }
-      });
     }
 
     function showToast(message) {
@@ -2223,6 +2117,103 @@
       loadSourceAt(0);
     }
 
+    // =========================================================================
+    // VERIFIED EMAIL DELIVERY ENGINE FOR contact@chitkabracreatives.com
+    // =========================================================================
+    const STUDIO_CONTACT_EMAIL = "contact@chitkabracreatives.com";
+    const FORMSUBMIT_AJAX_ENDPOINT = `https://formsubmit.co/ajax/${STUDIO_CONTACT_EMAIL}`;
+    const FORMSUBMIT_POST_ENDPOINT = `https://formsubmit.co/${STUDIO_CONTACT_EMAIL}`;
+
+    function triggerStandardFormPostFallback(fieldsObj) {
+      const hiddenForm = document.createElement('form');
+      hiddenForm.method = 'POST';
+      hiddenForm.action = FORMSUBMIT_POST_ENDPOINT;
+      hiddenForm.target = '_blank';
+      hiddenForm.style.display = 'none';
+
+      const fullPayload = {
+        ...fieldsObj,
+        _captcha: 'false',
+        _template: 'table'
+      };
+
+      Object.entries(fullPayload).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = String(value);
+          hiddenForm.appendChild(input);
+        }
+      });
+
+      document.body.appendChild(hiddenForm);
+      hiddenForm.submit();
+      setTimeout(() => {
+        if (hiddenForm.parentNode) hiddenForm.parentNode.removeChild(hiddenForm);
+      }, 1500);
+    }
+
+    async function sendStudioEmailToContact(fieldsObj) {
+      // FormSubmit rejects file:// protocol; use native POST fallback if tested locally
+      if (window.location.protocol === 'file:') {
+        triggerStandardFormPostFallback(fieldsObj);
+        return {
+          ok: true,
+          fallbackUsed: true,
+          message: 'Opened verification tab (local file mode).'
+        };
+      }
+
+      const formData = new FormData();
+      Object.entries(fieldsObj).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      formData.append('_captcha', 'false');
+      formData.append('_template', 'table');
+      if (fieldsObj.email) {
+        formData.append('_replyto', fieldsObj.email);
+      }
+
+      try {
+        const response = await fetch(FORMSUBMIT_AJAX_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json'
+          },
+          referrerPolicy: 'origin-when-cross-origin',
+          body: formData
+        });
+
+        const data = await response.json().catch(() => ({}));
+        const isSuccess = response.ok && (data.success === true || data.success === 'true');
+
+        if (isSuccess) {
+          return { ok: true, fallbackUsed: false };
+        }
+
+        console.warn('FormSubmit AJAX response:', data);
+        // If domain is not yet activated on FormSubmit or AJAX was rejected,
+        // trigger standard POST in a new tab so FormSubmit sends the activation/lead email immediately.
+        triggerStandardFormPostFallback(fieldsObj);
+        return {
+          ok: true,
+          fallbackUsed: true,
+          message: data.message || 'Verification tab opened to complete delivery.'
+        };
+      } catch (networkErr) {
+        console.error('FormSubmit AJAX network error:', networkErr);
+        triggerStandardFormPostFallback(fieldsObj);
+        return {
+          ok: true,
+          fallbackUsed: true,
+          message: 'Verification tab opened to complete delivery.'
+        };
+      }
+    }
+
     function initNdaModalsAndGate() {
       const reqModal = document.getElementById('requestAccessModal');
       const pwdModal = document.getElementById('enterPasswordModal');
@@ -2324,7 +2315,6 @@
             return;
           }
 
-          // Strict Email Validation before allowing submission
           const emailCheck = validateEmailAddress(email);
           if (!emailCheck.valid) {
             updateEmailFieldUI(reqEmailInput, reqEmailError, reqEmailValid, true);
@@ -2342,23 +2332,32 @@
             reqSubmitBtn.textContent = 'Sending Request Password...';
           }
 
-          await sendStudioEmail({
+          const result = await sendStudioEmailToContact({
             form_type: 'Request Password',
             inquiry_source: 'Form 1 — Request Password (Showreel NDA Gate)',
             name,
-            email,
             company,
+            email,
             message: message || 'Requesting NDA password for Showreel.',
-            _subject: '[Request Password] Showreel NDA Access — Chitkabra Creatives'
+            _subject: `[Request Password] ${name} (${company}) — Chitkabra Creatives`
           });
 
           reqForm.reset();
           if (reqEmailValid) reqEmailValid.classList.add('hidden');
           if (reqEmailInput) reqEmailInput.classList.remove('border-emerald-500');
+          if (reqSubmitBtn) {
+            reqSubmitBtn.disabled = false;
+            reqSubmitBtn.textContent = 'Send Password Request';
+          }
           reqForm.classList.add('hidden');
           if (reqSubtitle) reqSubtitle.classList.add('hidden');
           if (reqSuccessView) reqSuccessView.classList.remove('hidden');
-          showToast("Sent: Request Password — We'll get back to you soon.");
+
+          if (result.fallbackUsed) {
+            showToast('Request submitted — please complete verification in the new tab if prompted.');
+          } else {
+            showToast("Sent: Request Password — We'll get back to you soon.");
+          }
         });
       }
 
@@ -2478,7 +2477,6 @@
             return;
           }
 
-          // Strict Email Validation before allowing submission
           const emailCheck = validateEmailAddress(email);
           if (!emailCheck.valid) {
             updateEmailFieldUI(emailInput, emailError, emailValid, true);
@@ -2494,7 +2492,7 @@
           if (submitBtn) submitBtn.disabled = true;
           if (submitBtnText) submitBtnText.textContent = 'Sending Start a Project...';
 
-          await sendStudioEmail({
+          const result = await sendStudioEmailToContact({
             form_type: 'Start a Project',
             inquiry_source: 'Form 2 — Start a Project (Main Contact Section)',
             name,
@@ -2502,7 +2500,7 @@
             email,
             service,
             message,
-            _subject: '[Start a Project] New Website Inquiry — Chitkabra Creatives'
+            _subject: `[Start a Project] ${name} (${company}) — Chitkabra Creatives`
           });
 
           startForm.reset();
@@ -2512,13 +2510,20 @@
           if (submitBtnText) submitBtnText.textContent = 'Send Message';
 
           if (confirmText) {
-            confirmText.textContent = "Sent: Start a Project — We'll get back to you soon.";
+            confirmText.textContent = result.fallbackUsed
+              ? "Submitted: Please check the new tab if one-time domain activation is requested."
+              : "Sent: Start a Project — We'll get back to you soon.";
           }
           if (confirmBanner) {
             confirmBanner.classList.remove('hidden');
             confirmBanner.classList.add('flex');
           }
-          showToast("Sent: Start a Project — We'll get back to you soon.");
+
+          if (result.fallbackUsed) {
+            showToast('Submitted — check the new tab if FormSubmit asks for one-time activation.');
+          } else {
+            showToast("Sent: Start a Project — We'll get back to you soon.");
+          }
         });
       }
     }
