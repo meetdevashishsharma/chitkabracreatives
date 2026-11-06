@@ -2118,12 +2118,93 @@
     }
 
     // =========================================================================
-    // CORS-SAFE FORMSUBMIT.CO ENGINE FOR contact@chitkabracreatives.com
+    // RELIABLE STUDIO EMAIL ENGINE (Web3Forms Primary + Formspree + 8s Timeout Backup)
     // =========================================================================
+    // 1. Get your free Web3Forms Access Key in 10 seconds at https://web3forms.com/
+    //    by entering contact@chitkabracreatives.com, then paste it below:
+    const WEB3FORMS_ACCESS_KEY = "b4019188-9eb3-41ec-a552-35a3f8347c59";
+    const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+
+    // Optional: Or paste a Formspree endpoint (e.g. "https://formspree.io/f/xxxxxxx")
+    const FORMSPREE_ENDPOINT = "";
+
+    // Automatic backup endpoint (with strict 8-second AbortController timeout so UI never hangs on 522)
     const FORMSUBMIT_AJAX_ENDPOINT = "https://formsubmit.co/ajax/contact@chitkabracreatives.com";
-    const FORMSUBMIT_STANDARD_ENDPOINT = "https://formsubmit.co/contact@chitkabracreatives.com";
+
+    async function fetchWithTimeout(url, options, timeoutMs = 8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
     async function sendStudioEmailToContact(fieldsObj) {
+      // A. Primary Route: Web3Forms API (Fast, 99.99% uptime, full CORS support, zero 522 timeouts)
+      if (WEB3FORMS_ACCESS_KEY && WEB3FORMS_ACCESS_KEY !== "YOUR_WEB3FORMS_ACCESS_KEY_HERE") {
+        try {
+          const web3FormData = new FormData();
+          web3FormData.append("access_key", WEB3FORMS_ACCESS_KEY.trim());
+          web3FormData.append("from_name", "Chitkabra Creatives Website");
+          if (fieldsObj._subject) {
+            web3FormData.append("subject", fieldsObj._subject);
+          }
+          if (fieldsObj.email) {
+            web3FormData.append("replyto", fieldsObj.email);
+          }
+          Object.entries(fieldsObj).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && key !== "_subject") {
+              web3FormData.append(key, String(value));
+            }
+          });
+
+          const res = await fetchWithTimeout(WEB3FORMS_ENDPOINT, {
+            method: "POST",
+            headers: { "Accept": "application/json" },
+            body: web3FormData
+          }, 10000);
+
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.success) {
+            return { ok: true, message: "Email sent via Web3Forms" };
+          }
+          return {
+            ok: false,
+            message: data.message || "Web3Forms rejected the request — please verify your Access Key."
+          };
+        } catch (err) {
+          console.error("Web3Forms error:", err);
+        }
+      }
+
+      // B. Optional Route: Formspree (if FORMSPREE_ENDPOINT is configured)
+      if (FORMSPREE_ENDPOINT && FORMSPREE_ENDPOINT.startsWith("https://formspree.io/")) {
+        try {
+          const fsData = new FormData();
+          Object.entries(fieldsObj).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              fsData.append(key, String(value));
+            }
+          });
+          if (fieldsObj.email) fsData.append("_replyto", fieldsObj.email);
+
+          const res = await fetchWithTimeout(FORMSPREE_ENDPOINT, {
+            method: "POST",
+            headers: { "Accept": "application/json" },
+            body: fsData
+          }, 10000);
+
+          if (res.ok) {
+            return { ok: true, message: "Email sent via Formspree" };
+          }
+        } catch (err) {
+          console.error("Formspree error:", err);
+        }
+      }
+
+      // C. Backup Route: FormSubmit with strict 8-second timeout (prevents button hanging on Cloudflare 522)
       const formData = new FormData();
       Object.entries(fieldsObj).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -2137,53 +2218,27 @@
       }
 
       try {
-        // 1. Send as FormData (CORS Simple Request — avoids OPTIONS preflight failure)
-        const response = await fetch(FORMSUBMIT_AJAX_ENDPOINT, {
+        const response = await fetchWithTimeout(FORMSUBMIT_AJAX_ENDPOINT, {
           method: "POST",
-          headers: {
-            "Accept": "application/json"
-          },
+          headers: { "Accept": "application/json" },
           body: formData
-        });
+        }, 8000);
 
         const data = await response.json().catch(() => ({}));
         if (response.ok && (data.success === true || data.success === "true")) {
           return { ok: true, message: "Email sent" };
         }
-
-        // If FormSubmit returns success: "false" (e.g., needs first-time activation),
-        // fire standard endpoint in no-cors mode to trigger the activation email
-        await fetch(FORMSUBMIT_STANDARD_ENDPOINT, {
-          method: "POST",
-          mode: "no-cors",
-          body: formData
-        });
-
         return {
-          ok: true,
-          message: data.message || "Submitted"
+          ok: false,
+          message: data.message || "Please add your free Web3Forms Access Key in index.html."
         };
-      } catch (corsOrNetworkErr) {
-        // 2. Fallback: If browser CORS blocks reading the response (e.g., in preview or unactivated domain),
-        // send using mode: "no-cors" so the POST payload still reaches FormSubmit's server
-        try {
-          await fetch(FORMSUBMIT_AJAX_ENDPOINT, {
-            method: "POST",
-            mode: "no-cors",
-            body: formData
-          });
-          await fetch(FORMSUBMIT_STANDARD_ENDPOINT, {
-            method: "POST",
-            mode: "no-cors",
-            body: formData
-          });
-          return { ok: true, message: "Submitted" };
-        } catch (finalErr) {
-          return {
-            ok: false,
-            message: "Unable to reach mail server — please check your internet connection."
-          };
-        }
+      } catch (err) {
+        return {
+          ok: false,
+          message: (WEB3FORMS_ACCESS_KEY === "YOUR_WEB3FORMS_ACCESS_KEY_HERE")
+            ? "FormSubmit is down (522). Paste your free Web3Forms Access Key to enable instant delivery."
+            : "Mail server timed out — please try again or use Direct Email / WhatsApp."
+        };
       }
     }
 
