@@ -2118,98 +2118,48 @@
     }
 
     // =========================================================================
-    // VERIFIED EMAIL DELIVERY ENGINE FOR contact@chitkabracreatives.com
+    // PURE SILENT FORMSUBMIT.CO AJAX ENGINE FOR contact@chitkabracreatives.com
     // =========================================================================
-    const STUDIO_CONTACT_EMAIL = "contact@chitkabracreatives.com";
-    const FORMSUBMIT_AJAX_ENDPOINT = `https://formsubmit.co/ajax/${STUDIO_CONTACT_EMAIL}`;
-    const FORMSUBMIT_POST_ENDPOINT = `https://formsubmit.co/${STUDIO_CONTACT_EMAIL}`;
-
-    function triggerStandardFormPostFallback(fieldsObj) {
-      const hiddenForm = document.createElement('form');
-      hiddenForm.method = 'POST';
-      hiddenForm.action = FORMSUBMIT_POST_ENDPOINT;
-      hiddenForm.target = '_blank';
-      hiddenForm.style.display = 'none';
-
-      const fullPayload = {
-        ...fieldsObj,
-        _captcha: 'false',
-        _template: 'table'
-      };
-
-      Object.entries(fullPayload).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = String(value);
-          hiddenForm.appendChild(input);
-        }
-      });
-
-      document.body.appendChild(hiddenForm);
-      hiddenForm.submit();
-      setTimeout(() => {
-        if (hiddenForm.parentNode) hiddenForm.parentNode.removeChild(hiddenForm);
-      }, 1500);
-    }
+    const FORMSUBMIT_AJAX_ENDPOINT = "https://formsubmit.co/ajax/contact@chitkabracreatives.com";
 
     async function sendStudioEmailToContact(fieldsObj) {
-      // FormSubmit rejects file:// protocol; use native POST fallback if tested locally
-      if (window.location.protocol === 'file:') {
-        triggerStandardFormPostFallback(fieldsObj);
-        return {
-          ok: true,
-          fallbackUsed: true,
-          message: 'Opened verification tab (local file mode).'
-        };
-      }
-
-      const formData = new FormData();
-      Object.entries(fieldsObj).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, String(value));
-        }
-      });
-      formData.append('_captcha', 'false');
-      formData.append('_template', 'table');
+      const payload = {
+        ...fieldsObj,
+        _captcha: "false",
+        _template: "table"
+      };
       if (fieldsObj.email) {
-        formData.append('_replyto', fieldsObj.email);
+        payload._replyto = fieldsObj.email;
       }
 
       try {
         const response = await fetch(FORMSUBMIT_AJAX_ENDPOINT, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Accept': 'application/json'
+            "Content-Type": "application/json",
+            "Accept": "application/json"
           },
-          referrerPolicy: 'origin-when-cross-origin',
-          body: formData
+          referrerPolicy: "origin-when-cross-origin",
+          body: JSON.stringify(payload)
         });
 
         const data = await response.json().catch(() => ({}));
-        const isSuccess = response.ok && (data.success === true || data.success === 'true');
+        const isSuccess = response.ok && (data.success === true || data.success === "true");
 
         if (isSuccess) {
-          return { ok: true, fallbackUsed: false };
+          return { ok: true, message: "Email sent" };
         }
 
-        console.warn('FormSubmit AJAX response:', data);
-        // If domain is not yet activated on FormSubmit or AJAX was rejected,
-        // trigger standard POST in a new tab so FormSubmit sends the activation/lead email immediately.
-        triggerStandardFormPostFallback(fieldsObj);
+        console.warn("FormSubmit.co AJAX response:", data);
         return {
-          ok: true,
-          fallbackUsed: true,
-          message: data.message || 'Verification tab opened to complete delivery.'
+          ok: false,
+          message: data.message || "FormSubmit could not send the email from this environment."
         };
-      } catch (networkErr) {
-        console.error('FormSubmit AJAX network error:', networkErr);
-        triggerStandardFormPostFallback(fieldsObj);
+      } catch (err) {
+        console.error("FormSubmit.co AJAX network error:", err);
         return {
-          ok: true,
-          fallbackUsed: true,
-          message: 'Verification tab opened to complete delivery.'
+          ok: false,
+          message: "Network error — please submit from the live website domain."
         };
       }
     }
@@ -2305,16 +2255,18 @@
           e.preventDefault();
           const nameEl = document.getElementById('ndaReqName');
           const companyEl = document.getElementById('ndaReqCompany');
+          const msgEl = document.getElementById('ndaReqMessage');
           const name = nameEl ? nameEl.value.trim() : '';
           const company = companyEl ? companyEl.value.trim() : '';
           const email = reqEmailInput ? reqEmailInput.value.trim() : '';
-          const message = document.getElementById('ndaReqMessage').value.trim();
+          const message = msgEl ? msgEl.value.trim() : '';
 
           if (!name || !company) {
             showToast('Please fill in your Name and Company.');
             return;
           }
 
+          // Strict Email Validation before allowing submission
           const emailCheck = validateEmailAddress(email);
           if (!emailCheck.valid) {
             updateEmailFieldUI(reqEmailInput, reqEmailError, reqEmailValid, true);
@@ -2342,22 +2294,23 @@
             _subject: `[Request Password] ${name} (${company}) — Chitkabra Creatives`
           });
 
-          reqForm.reset();
-          if (reqEmailValid) reqEmailValid.classList.add('hidden');
-          if (reqEmailInput) reqEmailInput.classList.remove('border-emerald-500');
           if (reqSubmitBtn) {
             reqSubmitBtn.disabled = false;
             reqSubmitBtn.textContent = 'Send Password Request';
           }
+
+          if (!result.ok) {
+            showToast(`FormSubmit: ${result.message}`);
+            return;
+          }
+
+          reqForm.reset();
+          if (reqEmailValid) reqEmailValid.classList.add('hidden');
+          if (reqEmailInput) reqEmailInput.classList.remove('border-emerald-500');
           reqForm.classList.add('hidden');
           if (reqSubtitle) reqSubtitle.classList.add('hidden');
           if (reqSuccessView) reqSuccessView.classList.remove('hidden');
-
-          if (result.fallbackUsed) {
-            showToast('Request submitted — please complete verification in the new tab if prompted.');
-          } else {
-            showToast("Sent: Request Password — We'll get back to you soon.");
-          }
+          showToast("Sent: Request Password — We'll get back to you soon.");
         });
       }
 
@@ -2431,7 +2384,7 @@
     }
 
     // =========================================================================
-    // CHANGE #6.1: MAIN CONTACT FORM ("START A PROJECT") + EMAIL VALIDATION
+    // MAIN CONTACT FORM ("START A PROJECT") + STRICT EMAIL VALIDATION
     // =========================================================================
     function initContactForm() {
       const startForm = document.getElementById('startProjectForm');
@@ -2465,18 +2418,23 @@
       if (startForm) {
         startForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const name = document.getElementById('contactName').value.trim();
-          const company = document.getElementById('contactCompany').value.trim();
-          const email = emailInput ? emailInput.value.trim() : '';
+          const nameEl = document.getElementById('contactName');
+          const companyEl = document.getElementById('contactCompany');
           const serviceEl = document.getElementById('contactService');
+          const messageEl = document.getElementById('contactMessage');
+
+          const name = nameEl ? nameEl.value.trim() : '';
+          const company = companyEl ? companyEl.value.trim() : '';
+          const email = emailInput ? emailInput.value.trim() : '';
           const service = serviceEl ? serviceEl.value : '';
-          const message = document.getElementById('contactMessage').value.trim();
+          const message = messageEl ? messageEl.value.trim() : '';
 
           if (!name || !company || !message) {
             showToast('Please fill in all required fields (Name, Company, Message).');
             return;
           }
 
+          // Strict Email Validation before allowing submission
           const emailCheck = validateEmailAddress(email);
           if (!emailCheck.valid) {
             updateEmailFieldUI(emailInput, emailError, emailValid, true);
@@ -2503,27 +2461,26 @@
             _subject: `[Start a Project] ${name} (${company}) — Chitkabra Creatives`
           });
 
-          startForm.reset();
-          if (emailValid) emailValid.classList.add('hidden');
-          if (emailInput) emailInput.classList.remove('border-emerald-500');
           if (submitBtn) submitBtn.disabled = false;
           if (submitBtnText) submitBtnText.textContent = 'Send Message';
 
+          if (!result.ok) {
+            showToast(`FormSubmit: ${result.message}`);
+            return;
+          }
+
+          startForm.reset();
+          if (emailValid) emailValid.classList.add('hidden');
+          if (emailInput) emailInput.classList.remove('border-emerald-500');
+
           if (confirmText) {
-            confirmText.textContent = result.fallbackUsed
-              ? "Submitted: Please check the new tab if one-time domain activation is requested."
-              : "Sent: Start a Project — We'll get back to you soon.";
+            confirmText.textContent = "Sent: Start a Project — We'll get back to you soon.";
           }
           if (confirmBanner) {
             confirmBanner.classList.remove('hidden');
             confirmBanner.classList.add('flex');
           }
-
-          if (result.fallbackUsed) {
-            showToast('Submitted — check the new tab if FormSubmit asks for one-time activation.');
-          } else {
-            showToast("Sent: Start a Project — We'll get back to you soon.");
-          }
+          showToast("Sent: Start a Project — We'll get back to you soon.");
         });
       }
     }
