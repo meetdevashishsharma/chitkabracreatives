@@ -2142,28 +2142,37 @@
     }
 
     async function sendStudioEmailToContact(fieldsObj) {
-      // A. Primary Route: Web3Forms API (Fast, 99.99% uptime, full CORS support, zero 522 timeouts)
+      // A. Primary Route: Web3Forms Official JSON API (with botcheck: "" and anti-self-spoofing replyto)
       if (WEB3FORMS_ACCESS_KEY && WEB3FORMS_ACCESS_KEY !== "YOUR_WEB3FORMS_ACCESS_KEY_HERE") {
         try {
-          const web3FormData = new FormData();
-          web3FormData.append("access_key", WEB3FORMS_ACCESS_KEY.trim());
-          web3FormData.append("from_name", "Chitkabra Creatives Website");
-          if (fieldsObj._subject) {
-            web3FormData.append("subject", fieldsObj._subject);
+          const senderEmail = (fieldsObj.email || "").trim();
+          const web3Payload = {
+            access_key: WEB3FORMS_ACCESS_KEY.trim(),
+            subject: fieldsObj._subject || `New ${fieldsObj.form_type || "Website"} Submission — Chitkabra Creatives`,
+            from_name: fieldsObj.name ? `${fieldsObj.name} via Chitkabra Website` : "Chitkabra Creatives Website",
+            botcheck: "",
+            Form_Type: fieldsObj.form_type || "",
+            Inquiry_Source: fieldsObj.inquiry_source || "",
+            Name: fieldsObj.name || "",
+            Company: fieldsObj.company || "",
+            Email: senderEmail,
+            Message: fieldsObj.message || ""
+          };
+          if (fieldsObj.service) {
+            web3Payload.Service = fieldsObj.service;
           }
-          if (fieldsObj.email) {
-            web3FormData.append("replyto", fieldsObj.email);
+          // Avoid setting replyto to the destination inbox itself (prevents custom-domain SPF/self-spoofing quarantine)
+          if (senderEmail && senderEmail.toLowerCase() !== "contact@chitkabracreatives.com") {
+            web3Payload.replyto = senderEmail;
           }
-          Object.entries(fieldsObj).forEach(([key, value]) => {
-            if (value !== undefined && value !== null && key !== "_subject") {
-              web3FormData.append(key, String(value));
-            }
-          });
 
           const res = await fetchWithTimeout(WEB3FORMS_ENDPOINT, {
             method: "POST",
-            headers: { "Accept": "application/json" },
-            body: web3FormData
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify(web3Payload)
           }, 10000);
 
           const data = await res.json().catch(() => ({}));
